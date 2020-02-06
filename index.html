@@ -60,9 +60,9 @@
 <body>
 <div id="mescroll" class="mescroll"> 
   <div id="joinFormHeader" class="w3-container w3-blue">
-    <h2 style="font-family: 'Noto Sans TC'">請提供參加團體課程，挑戰賽及使用優惠券的必要資料 
+    <h4 style="font-family: 'Noto Sans TC'">請提供參加團體課程，挑戰賽及使用優惠券的必要資料 
       <span id="versionStr1" style="float: right; font-size: 0.5em;"></span>
-    </h2>
+    </h4>
     
   </div>
 
@@ -91,9 +91,15 @@
       <label>身分證號(必填，作為會員身份辨識，不用做其他用途)</label>
       <input id="identity" class="w3-input" type="text"></p>
     <p>
+      <label>緊急連絡人(必填，緊急聯絡使用)</label>
+      <input id="emergencyContact" class="w3-input" type="text"></p>
+    <p>
+      <label>緊急連絡電話(必填，緊急聯絡使用)</label>
+      <input id="emergencyPhone" class="w3-input" type="text"></p>
+    <p>
       <label>地址(建議，聯絡使用)</label>
       <input id="address" class="w3-input" type="text"></p>
-    <p>
+    <p>          
       <button class="w3-btn w3-block w3-indigo" onclick="addConfirm()">送出資料</button>
     </p>
     <p>
@@ -340,7 +346,9 @@
         "&Address=" + $("#address").val() +
         "&UserId=" + userId[1] +        
         "&PicURL=" + pictureUrl[1] +       
-        "&Height=" + $("#bodyHeight").val();
+        "&Height=" + $("#bodyHeight").val()+
+        "&emergencyContact=" + $("#emergencyContact").val()+
+        "&emergencyPhone=" + $("#emergencyPhone").val();        
 
       var profile = "請確認會員資料:\n" +
         "    會員姓名: " + $("#name").text() + "\n" +
@@ -349,7 +357,10 @@
         "    會員生日: " + $("#birthday").val() + "\n" +
         "    會員電話: " + $("#phone").val() + "\n" +
         "    身分證號: " + $("#identity").val() + "\n" +
-        "    會員地址: " + $("#address").val();
+        "    會員地址: " + $("#address").val() + "\n" +
+        "    緊急聯絡人:" + $("#emergencyContact").val() + "\n" +       
+        "    緊急聯絡電話:" + $("#emergencyPhone").val();        
+      ;
 
       console.log(paramToSend);
 
