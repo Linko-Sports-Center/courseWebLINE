@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 
-<!--處理輸入參數 ?displayName=小林&userId=U12345678901234567890123456789012&pictureUrl=www.google.com-->
+<!--處理輸入參數 ?displayName=小華&userId=U722be0c9c9d36e011c0e556bd2047819&pictureUrl=www.google.com-->
 
 <head>
   <!--  設定參數-->
@@ -32,28 +32,16 @@
       bottom: 0;
       height: auto;
     }
+    
+    .inputWithUnit { /* 只是為了讓身高和體重的輸入 有單位顯示*/
+      width: 50%; 
+      margin: 8px; 
+      border: none;       
+    }
+    
   </style>
+  
   <script src="js/mescroll.js" type="text/javascript" charset="utf-8"></script>
-<!--
-  <style>
-  body, html {
-    height: 100%;
-    margin: 0;
-  }
-  .bg {
-    /* The image used */
-    background-image: url(photo-1547919307-1ecb10702e6f.jpg);
-
-    /* Full height */
-    height: 100%; 
-
-    /* Center and scale the image nicely */
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-  }
-  </style>
--->
 
 </head>
 
@@ -79,12 +67,17 @@
 <!--        <option value="保密">保密</option>-->
       </select></p>
     <p>
-      <label>身高(必填，Inbody 量測需要)</label>
-      <input id="bodyHeight" class="w3-input" type="text" placeholder="例如: 180cm"></p>
-    <p>
       <label>生日(必填，Inbody 量測需要)</label>
       <input id="birthday" class="w3-input" type="text" placeholder="格式 2020-01-01"></p>      
     <p>     
+      <label>身高(必填，Inbody 量測需要)</label>
+      <input id="bodyHeight" class="inputWithUnit" type="text" placeholder="例如: 180cm">cm</p>
+      <div style="height: 1px; margin-top: -15px; border-bottom-style: solid;border-width: 1px;border-color: lightgray"></div>
+    <p>
+      <label>體重(必填，Inbody 量測需要)</label>
+      <input id="bodyWeight" class="inputWithUnit" type="text" placeholder="例如: 60kg">kg</p>
+      <div style="height: 1px; margin-top: -15px; border-bottom-style: solid;border-width: 1px;border-color: lightgray"></div>      
+    <p>          
       <label>電話(必填，聯絡使用)</label>
       <input id="phone" class="w3-input" type="text"></p>
     <p>
@@ -132,61 +125,21 @@
     <div class="w3-container" id="availableCourses" style="font-family: 'Noto Sans TC'">
       <span><button class="w3-button w3-circle w3-teal" style="margin: 10px; width: 40px" onclick="refreshCourses()"><i class="fa fa-refresh" style="margin-left: -3px;"></i></button></span>
       <h4 style="font-family: 'Noto Sans TC'; display: inline;">可報名課程</h4>
-      
-
-  <!--
-      <div class="w3-card-4" style="width:100%">
-        <header class="w3-container w3-teal">
-          <h4>課程名稱 - </h4>
-        </header>
-        <div class="w3-container">
-          <p>老師名字:</p>
-          <p>日期時間:</p>
-          <p>費用:</p>
-        </div>
-        <button class="w3-button w3-block w3-indigo" onclick="報名課程(1)">報名</button>
-      </div>
-  -->
+      <!--由 addCourseCards() 加入 cards-->
     </div>   
     
     <hr>
     <div class="w3-container" id="inCourses" style="font-family: 'Noto Sans TC'">
       <span><button class="w3-button w3-circle w3-teal" style="margin: 10px; width: 40px" onclick="refreshCourses()"><i class="fa fa-refresh" style="margin-left: -3px"></i></button></span>     
       <h4 style="font-family: 'Noto Sans TC'; display: inline">已報名課程</h4>
-
-  <!--
-      <div class="w3-card-4" style="width:100%">
-        <header class="w3-container w3-teal">
-          <h4>課程名稱 - </h4>
-        </header>
-        <div class="w3-container">
-          <p>老師名字:</p>
-          <p>日期時間:</p>
-          <p>費用:</p>
-        </div>
-        <button class="w3-button w3-block w3-indigo" onclick="報名課程(1)">報名</button>
-      </div>
-  -->
+      <!--由 addCourseCards() 加入 cards-->
     </div> 
                  
     <hr>
     <div class="w3-container" id="oldCourses" style="font-family: 'Noto Sans TC'">
       <span><button class="w3-button w3-circle w3-teal" style="margin: 10px; width: 40px" onclick="refreshCourses()"><i class="fa fa-refresh" style="margin-left: -3px"></i></button></span>     
       <h4 style="font-family: 'Noto Sans TC'; display: inline">已到期報名課程</h4>
-
-  <!--
-      <div class="w3-card-4" style="width:100%">
-        <header class="w3-container w3-teal">
-          <h4>課程名稱 - </h4>
-        </header>
-        <div class="w3-container">
-          <p>老師名字:</p>
-          <p>日期時間:</p>
-          <p>費用:</p>
-        </div>
-        <button class="w3-button w3-block w3-indigo" onclick="報名課程(1)">報名</button>
-      </div>
-  -->
+      <!--由 addCourseCards() 加入 cards-->
     </div>                  
                   
   </div>  
@@ -287,44 +240,53 @@
       }
     }
 
-    function checkUserIdExist() {
+    // 非同步
+    function callAPI(param, loadingMessage) {
+      return new Promise(function(resolve, reject) {       
+        var request = new XMLHttpRequest();
+        if (useLocalAPIs) {
+          request.open('GET', 'http://localhost:5000' + param, true);
+        } else {
+          request.open('GET', 'https://api-linko-sports-center.herokuapp.com/'+param, true);
+        }
+
+        request.onload = function() {
+          $.loading.end();
+          console.log(this.response);
+          
+          resolve(this.response);
+        }
+        // Send API request 
+        $.loading.start(loadingMessage);
+
+        request.send();    
+      });
+    }
+    
+    async function checkUserIdExist() {
       //Call API:00 檢查 userId 有沒有重複參加 */
 
       paramToSend = "?API=00" + "&UserId=" + userId[1];
-
-      var request = new XMLHttpRequest();
-      if (useLocalAPIs) {
-        request.open('GET', 'http://localhost:5000' + paramToSend, true);
+      var res = await callAPI(paramToSend, '檢查是否已填寫必要資料');
+      
+      if (res == "API:00 會員不存在") {
+        $("#joinForm").show();
+        $("#joinFormHeader").show();
+        alert("為了讓您更容易使用團體課程，挑戰賽及使用優惠券，請填寫必要資料");
       } else {
-        request.open('GET', 'https://api-linko-sports-center.herokuapp.com/'+paramToSend, true);
+        $("#joinForm").hide();
+        $("#joinFormHeader").hide();
+        //$("#alreadyMessage").css("display", "block");            
+        //alert("您以前已經加入會員! 前往團課");
+        // 顯示團課表格
+        console.log("前往團課");
+        $("#courseSection").css("display", "block");
+        readCourses();
+        //addCourseCards();
       }
-
-      request.onload = function() {
-        $.loading.end();
-        console.log(this.response);
-        if (this.response == "API:00 會員不存在") {
-          $("#joinForm").show();
-          $("#joinFormHeader").show();
-          alert("為了讓您更容易使用團體課程，挑戰賽及使用優惠券，請填寫必要資料");
-        } else {
-          $("#joinForm").hide();
-          $("#joinFormHeader").hide();
-          //$("#alreadyMessage").css("display", "block");            
-          //alert("您以前已經加入會員! 前往團課");
-          // 顯示團課表格
-          console.log("前往團課");
-          $("#courseSection").css("display", "block");
-          readCourses();
-          //addCourseCards();
-        }
-      }
-      // Send API request 
-      $.loading.start('檢查是否已填寫必要資料');
-     
-      request.send();
     }
 
-    function addConfirm() {
+    async function addConfirm() {
       console.log("addConfirm");
       // 檢查資料格式     
       if (   $("#name").text() == ""
@@ -332,6 +294,8 @@
           || $("#birthday").val() == ""
           || $("#phone").val() == ""
           || $("#identity").val() == ""
+          || $("#emergencyContact").val() == ""
+          || $("#emergencyPhone").val() == ""          
          ) {
         alert("請填寫必填項目!");
         return 0;
@@ -353,8 +317,9 @@
       var profile = "請確認會員資料:\n" +
         "    會員姓名: " + $("#name").text() + "\n" +
         "    會員姓別: " + $("#gender").val() + "\n" +
-        "    會員身高: " + $("#bodyHeight").val() + "\n" +          
-        "    會員生日: " + $("#birthday").val() + "\n" +
+        "    會員生日: " + $("#birthday").val() + "\n" +          
+        "    會員身高: " + $("#bodyHeight").val() + " cm" +"\n" +          
+        "    會員體重: " + $("#bodyWeight").val() + " kg" +"\n" +            
         "    會員電話: " + $("#phone").val() + "\n" +
         "    身分證號: " + $("#identity").val() + "\n" +
         "    會員地址: " + $("#address").val() + "\n" +
@@ -368,51 +333,59 @@
       //webCourseAPI();      
 
       if (confirm(profile)) {
-
-        // call API:01
-        var request = new XMLHttpRequest()
-        if (useLocalAPIs) {
-          request.open('GET', 'http://localhost:5000' + paramToSend, true);
-        } else {
-          request.open('GET', 'https://api-linko-sports-center.herokuapp.com/'+paramToSend, true);
+        
+        //writeToFTP();
+        userName = decodeURI(displayName[1]);
+        var request = new XMLHttpRequest();   // new HttpRequest instance 
+        var theUrl = "https://ugym3dbiking.azurewebsites.net/api/Questionnaire?Code=debug123";
+        request.open("POST", theUrl);
+        request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        
+        request.onload = function() { console.log(this.response);}  
+        
+        var ftpToWrite = {
+          "userId":    userId[1],
+          "nickName":  userName,
+          "gender":    ($("#gender").val()=="女")? 0:1,
+          "birthYear": $("#birthday").val().substring(0,4),
+          "weight":    $("#bodyWeight").val(),
+          "height":    $("#bodyHeight").val(),
+          "score1":    1,
+          "score2":    1,
+          "score3":    1          
         }
-      
-
-        request.onload = function() {
-          console.log(this.response);
-
-          if (this.response == "API:01 會員寫入成功") {
-            $("#joinForm").hide();
-            $("#joinFormHeader").hide();
-            //$("#finishMessage").css("display", "block"); 
-            alert("資料新增成功，前往團課")
-            // 顯示團課表格
-            console.log("前往團課");
-            $("#courseSection").css("display", "block");
-            readCourses();
-            //addCourseCards();
-
-          } else {
-            alert("資料新增失敗，請洽管理員")
-            $("#joinForm").hide();
-            $("#errorMessage").css("display", "block");
-          }
-
-        }
-        // Send request
-        request.send();
-
+        console.log(JSON.stringify(ftpToWrite));
+        request.send(JSON.stringify(ftpToWrite));
+        
+        
+        // 寫入會員到 Direbase
+        var res = await callAPI(paramToSend, '寫入資料');
+        
+//        if (res == "API:01 會員寫入成功") {
+//          $("#joinForm").hide();
+//          $("#joinFormHeader").hide();
+//          //$("#finishMessage").css("display", "block"); 
+//          alert("資料新增成功，前往團課")
+//          // 顯示團課表格
+//          console.log("前往團課");
+//          $("#courseSection").css("display", "block");
+//          readCourses();
+//          //addCourseCards();
+//
+//        } else {
+//          alert("資料新增失敗，請洽管理員")
+//          $("#joinForm").hide();
+//          $("#errorMessage").css("display", "block");
+//        }
+          
       };
     };
-
+    
+  
     function readCourses(){
       console.log("call API to Read Database");
       userName = decodeURI(displayName[1]);
       
-//      $.loading.start('讀取資料');
-//      allDataReady = 0;
-//      getDataByAPIs();
-
       var checkDataReady = setInterval(function(){ 
         //console.log("aaa", allDataReady);
         if (allDataReady==4) {
@@ -576,18 +549,48 @@
     function addCourseCards(){
       console.log("add cards");
       
-      // cardStr1+課程名稱+cardStr2+老師名字+cardStr3+日期時間+cardStr4+費用+cardStr5+index+cardStr6
-      var cardStr1='<br> <div class="w3-card-4" style="width:100%;"> <header class="w3-container w3-teal"> \
-                    <h5 class="s-header" style="font-family: \'Noto Sans TC\'">'; //課程編號及課程名稱
-      var cardStr2='</h5> </header> <div class="w3-container" > <p>老師: ';
-      var cardStr3='<span style="float:right">日期:';
-      var cardStr4='</span><p>卡路里: ';
-      var cardStr5='<span style="float:right">費用: ';    
-      var cardStr6='</span></p> </div> <button class="w3-button w3-block w3-indigo" onclick="報名課程(\'';
-      var cardStr7='\')" >報名</button> </div>';
+      //== Card template =====================================
+      //    1B <div class="w3-card-4" style="width:100%;"> <header class="w3-container w3-teal">                    
+      //    h5 class="s-header" style="font-family: 'Noto Sans TC'">
+      //         U0003 - 多運動保健康
+      //    1E </h5></header> 
+      //  
+      //    2B <div class="w3-container" > <p>老師: 
+      //       Tony
+      //    2E 
+      //      
+      //    3B <span style="float:right">日期:
+      //       2020-2-7 19:00
+      //    3E </span>
+      //      
+      //    4B <p>卡路里: 
+      //       100
+      //    4E 
+      //      
+      //    5B <span style="float:right">費用: 
+      //       1
+      //    5E </span></p> </div> 
+      //      
+      //    6B <button class="w3-button w3-block w3-indigo" onclick="報名課程(
+      //      'U0003')
+      //    6E " >報名</button> </div> 
       
-      var cardStr6_1='</span></p> </div> <button class="w3-button w3-block w3-grey">';
-      var cardStr7_1='</button> </div>';     
+      var cardStr1B='<br> <div class="w3-card-4" style="width:100%;"> <header class="w3-container w3-teal"> \
+                    <h5 class="s-header" style="font-family: \'Noto Sans TC\'">'; //課程編號及課程名稱
+      var cardStr1E='</h5> </header>';      
+      var cardStr2B='<div class="w3-container" > <p>老師: ';
+      var cardStr2E=' ';     
+      var cardStr3B='<span style="float:right">日期:';
+      var cardStr3E='</span>';      
+      var cardStr4B='<p>卡路里: ';
+      var cardStr4E=' ';
+      var cardStr5B='<span style="float:right">費用: ';   
+      var cardStr5E='</span></p> </div>';      
+      var cardStr6B='<button class="w3-button w3-block w3-indigo" onclick="報名課程(\'';
+      var cardStr6E='\')" >報名</button> </div>';
+      
+      var cardStr7B='<button class="w3-button w3-block w3-grey">';
+      var cardStr7E='</button> </div>';        
 
       var 課程編號=[];
       var 課程名稱=[];
@@ -606,24 +609,24 @@
             老師名字.push(course[2]);
             日期時間.push(course[3]);
             卡路里.push(course[4]);
-            費用.push(course[7]);            
+            費用.push(course[5]);            
           }
         });
       });
 
       var cardStr;
       for (var i=0;i<notInCourse.length;i++) {
-        cardStr = cardStr1+課程編號[i] + " - " +課程名稱[i]
-                 +cardStr2+老師名字[i] 
-                 +cardStr3+日期時間[i]
-                 +cardStr4+卡路里[i]
-                 +cardStr5+費用[i]      
-                 +cardStr6+課程編號[i]
-                 +cardStr7;
-        //console.log(cardStr);
+        cardStr = cardStr1B + 課程編號[i] + " - " + 課程名稱[i] + cardStr1E
+                 +cardStr2B + 老師名字[i] + cardStr2E
+                 +cardStr3B + 日期時間[i] + cardStr3E
+                 +cardStr4B + 卡路里[i]  + cardStr4E
+                 +cardStr5B + 費用[i]    + cardStr5E
+                 +cardStr6B + 課程編號[i] + cardStr6E;
+        //console.log("aaa", cardStr);
 
         $("#availableCourses").append(cardStr);
-      }
+      }      
+
       // ================================================================================ 
 
       // 新增 已報名課程 卡片 ==============================================================
@@ -637,12 +640,11 @@
             老師名字.push(course[2]);
             日期時間.push(course[3]);
             卡路里.push(course[4]);
-            費用.push(course[7]);            
+            費用.push(course[5]);            
           }
         });
       });
 
-      var cardStr;
       var paid=false;
       for (var i=0;i<inCourse.length;i++) {
         // 尋找是否已繳費
@@ -659,14 +661,14 @@
          
         var paidStr = (paid)?"已繳費，請準時上課":"尚未繳費，請到櫃檯繳費";
         // 合成字串
-        cardStr = cardStr1+課程編號[i] + " - " +課程名稱[i]
-                 +cardStr2+老師名字[i] 
-                 +cardStr3+日期時間[i]
-                 +cardStr4+卡路里[i]
-                 +cardStr5+費用[i]      
-                 +cardStr6_1+paidStr
-                 +cardStr7_1;
-        //console.log(cardStr);
+        cardStr="";
+        cardStr = cardStr1B + 課程編號[i] + " - " + 課程名稱[i] + cardStr1E
+                 +cardStr2B + 老師名字[i] + cardStr2E
+                 +cardStr3B + 日期時間[i] + cardStr3E
+                 +cardStr4B + 卡路里[i]  + cardStr4E
+                 +cardStr5B + 費用[i]    + cardStr5E
+                 +cardStr7B + paidStr + cardStr7E;
+        //console.log("aaa", cardStr);
 
         $("#inCourses").append(cardStr);
       }      
@@ -683,24 +685,24 @@
             老師名字.push(course[2]);
             日期時間.push(course[3]);
             卡路里.push(course[4]);
-            費用.push(course[7]);            
+            費用.push(course[5]);            
           }
         });
       });
 
-      var cardStr;
+      cardStr="";
       for (var i=0;i<myHistory.length;i++) {
-        cardStr = cardStr1+課程編號[i] + " - " +課程名稱[i]
-                 +cardStr2+老師名字[i] 
-                 +cardStr3+日期時間[i]
-                 +cardStr4+卡路里[i]
-                 +cardStr5+費用[i]      
-                 +cardStr6_1
-                 +cardStr7_1;
-        //console.log(cardStr);
+        cardStr = cardStr1B + 課程編號[i] + " - " + 課程名稱[i] + cardStr1E
+                 +cardStr2B + 老師名字[i] + cardStr2E
+                 +cardStr3B + 日期時間[i] + cardStr3E
+                 +cardStr4B + 卡路里[i]  + cardStr4E
+                 +cardStr5B + 費用[i]    + cardStr5E
+                 +cardStr7B + cardStr7E;
+        //console.log("aaa", cardStr);
 
         $("#oldCourses").append(cardStr);
-      }      
+      }
+    
       // ===================================================================================            
       
     };
@@ -743,7 +745,11 @@
       console.log("refresh Courses");
       location.reload();
     }
+     
+    function writeToFTP(){
       
+    }
+    
   </script>
 
 </body>
