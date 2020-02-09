@@ -7,7 +7,7 @@
   <!--  設定參數-->
   <script>
     var useLocalAPIs = false;
-    var version = "1.4";
+    var version = "1.15";
   </script>
   
   <meta charset="UTF-8">
@@ -339,11 +339,37 @@
         //==> 2020-02-08 Germos fixed it，
         // 但用 localhost 測試，還會有同樣問題。
         
+        //GET is OK
+//        userName = decodeURI(displayName[1]);
+//        var request = new XMLHttpRequest();   // new HttpRequest instance 
+//        var theUrl1 = "https://ugym3dbiking.azurewebsites.net/api/Questionnaire?UserId="
+//        var theUrl2 = "&Code=debug123";
+//        request.open("GET", theUrl1+userId[1]+theUrl2);
+//        request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+//        
+//        request.onload = function() { console.log("aaa", this.response);}  
+//        
+//        var ftpToWrite = {
+//          "userId":    userId[1],
+//          "nickName":  userName,
+//          "gender":    ($("#gender").val()=="女")? 0:1,
+//          "birthYear": $("#birthday").val().substring(0,4),
+//          "weight":    $("#bodyWeight").val(),
+//          "height":    $("#bodyHeight").val(),
+//          "score1":    1,
+//          "score2":    1,
+//          "score3":    1          
+//        }
+//        console.log(JSON.stringify(ftpToWrite));
+//        //request.send(JSON.stringify(ftpToWrite));
+//        request.send();
+        // end GET
+        
         userName = decodeURI(displayName[1]);
         var request = new XMLHttpRequest();   // new HttpRequest instance 
-        var theUrl1 = "https://ugym3dbiking.azurewebsites.net/api/Questionnaire?UserId="
-        var theUrl2 = "&Code=debug123";
-        request.open("GET", theUrl1+userId[1]+theUrl2);
+        var theUrl1 = "https://ugym3dbiking.azurewebsites.net/api/Questionnaire?Code=debug123"
+        var theUrl2 = "";
+        request.open("POST", theUrl1);
         request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         
         request.onload = function() { console.log("aaa", this.response);}  
@@ -360,8 +386,8 @@
           "score3":    1          
         }
         console.log(JSON.stringify(ftpToWrite));
-        //request.send(JSON.stringify(ftpToWrite));
-        request.send();
+        request.send(JSON.stringify(ftpToWrite));
+        //request.send();        
         
         
         // 寫入會員到 Direbase     
