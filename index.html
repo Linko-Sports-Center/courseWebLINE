@@ -341,9 +341,8 @@
         
         userName = decodeURI(displayName[1]);
         var request = new XMLHttpRequest();   // new HttpRequest instance 
-        var theUrl1 = "https://ugym3dbiking.azurewebsites.net/api/Questionnaire?UserId="
-        var theUrl2 = "&Code=debug123";
-        request.open("POST", theUrl1+userId[1]+theUrl2);
+        var theUrl = "https://ugym3dbiking.azurewebsites.net/api/Questionnaire?Code=debug123";
+        request.open("POST", theUrl);
         request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         
         request.onload = function() { console.log("aaa", this.response);}  
