@@ -334,14 +334,19 @@
 
       if (confirm(profile)) {
         
-        //writeToFTP();
+        //  writeToFTP    
+        //  有錯誤: Access to XMLHttpRequest at 'https://ugym3dbiking.azurewebsites.net/api/Questionnaire?Code=debug123' from origin 'https://sabgkang.github.io' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.   
+        //==> 2020-02-08 Germos fixed it，
+        // 但用 localhost 測試，還會有同樣問題。
+        
         userName = decodeURI(displayName[1]);
         var request = new XMLHttpRequest();   // new HttpRequest instance 
-        var theUrl = "https://ugym3dbiking.azurewebsites.net/api/Questionnaire?Code=debug123";
-        request.open("POST", theUrl);
+        var theUrl1 = "https://ugym3dbiking.azurewebsites.net/api/Questionnaire?UserId="
+        var theUrl2 = "&Code=debug123";
+        request.open("POST", theUrl1+userId[1]+theUrl2);
         request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         
-        request.onload = function() { console.log(this.response);}  
+        request.onload = function() { console.log("aaa", this.response);}  
         
         var ftpToWrite = {
           "userId":    userId[1],
@@ -355,28 +360,29 @@
           "score3":    1          
         }
         console.log(JSON.stringify(ftpToWrite));
-        request.send(JSON.stringify(ftpToWrite));
+        //request.send(JSON.stringify(ftpToWrite));
+        request.send();
+        // end: writeToFTP        
         
+        // 寫入會員到 Direbase     
+        var res = await callAPI(paramToSend, '寫入資料');
         
-        // 寫入會員到 Direbase
-//        var res = await callAPI(paramToSend, '寫入資料');
-//        
-//        if (res == "API:01 會員寫入成功") {
-//          $("#joinForm").hide();
-//          $("#joinFormHeader").hide();
-//          //$("#finishMessage").css("display", "block"); 
-//          alert("資料新增成功，前往團課")
-//          // 顯示團課表格
-//          console.log("前往團課");
-//          $("#courseSection").css("display", "block");
-//          readCourses();
-//          //addCourseCards();
-//
-//        } else {
-//          alert("資料新增失敗，請洽管理員")
-//          $("#joinForm").hide();
-//          $("#errorMessage").css("display", "block");
-//        }
+        if (res == "API:01 會員寫入成功") {
+          $("#joinForm").hide();
+          $("#joinFormHeader").hide();
+          //$("#finishMessage").css("display", "block"); 
+          alert("資料新增成功，前往團課")
+          // 顯示團課表格
+          console.log("前往團課");
+          $("#courseSection").css("display", "block");
+          readCourses();
+          //addCourseCards();
+
+        } else {
+          alert("資料新增失敗，請洽管理員")
+          $("#joinForm").hide();
+          $("#errorMessage").css("display", "block");
+        }
           
       };
     };
