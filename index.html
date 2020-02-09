@@ -7,7 +7,7 @@
   <!--  設定參數-->
   <script>
     var useLocalAPIs = false;
-    var version = "1.15";
+    var version = "1.2";
   </script>
   
   <meta charset="UTF-8">
@@ -339,7 +339,7 @@
         //==> 2020-02-08 Germos fixed it，
         // 但用 localhost 測試，還會有同樣問題。
         
-        //GET is OK
+        //GET to https://ugym3dbiking.azurewebsites.net/
 //        userName = decodeURI(displayName[1]);
 //        var request = new XMLHttpRequest();   // new HttpRequest instance 
 //        var theUrl1 = "https://ugym3dbiking.azurewebsites.net/api/Questionnaire?UserId="
@@ -362,13 +362,14 @@
 //        }
 //        console.log(JSON.stringify(ftpToWrite));
 //        //request.send(JSON.stringify(ftpToWrite));
-//        request.send();
+//        request.send(); // 預留給 GET 測試
         // end GET
         
+        // POST to write FTP
         userName = decodeURI(displayName[1]);
         var request = new XMLHttpRequest();   // new HttpRequest instance 
         var theUrl1 = "https://ugym3dbiking.azurewebsites.net/api/Questionnaire?Code=debug123"
-        var theUrl2 = "";
+        var theUrl2 = ""; // 預留給 GET 測試
         request.open("POST", theUrl1);
         request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         
@@ -378,7 +379,7 @@
           "userId":    userId[1],
           "nickName":  userName,
           "gender":    ($("#gender").val()=="女")? 0:1,
-          "birthYear": $("#birthday").val().substring(0,4),
+          "birthYear": $("#birthday").val().substring(0,4), //必須是數字。不然寫入會有錯誤
           "weight":    $("#bodyWeight").val(),
           "height":    $("#bodyHeight").val(),
           "score1":    1,
@@ -387,8 +388,9 @@
         }
         console.log(JSON.stringify(ftpToWrite));
         request.send(JSON.stringify(ftpToWrite));
-        //request.send();        
+        //request.send(); // 預留給 GET 測試       
         
+        // end write FTP
         
         // 寫入會員到 Direbase     
         var res = await callAPI(paramToSend, '寫入資料');
