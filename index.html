@@ -7,7 +7,7 @@
   <!--  設定參數-->
   <script>
     var useLocalAPIs = false;
-    var version = "1.1";
+    var version = "1.15";
   </script>
   
   <meta charset="UTF-8">
@@ -358,6 +358,7 @@
           "score2":    1,
           "score3":    1          
         }
+        console.log("POST", theUrl);
         console.log(JSON.stringify(ftpToWrite));
         //request.send(JSON.stringify(ftpToWrite));
         request.send();
